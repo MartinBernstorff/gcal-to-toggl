@@ -92,9 +92,18 @@ for event in event_list:
     day = int(event[1][8:10])
     hour = int(event[1][11:13])
 
-    toggl.createTimeEntry(description=event[0],
-                          hourduration=hourduration,
-                          projectid=projectid,
-                          month=month,
-                          day=day,
-                          hour=hour)
+    data = {"time_entry":
+            {
+                "description": event[0],
+                "start": event[1],
+                "duration": int(hourduration * 3600),
+                "pid": projectid,
+                "created_with": "gcal-to-toggl"
+            }}
+
+    pprint(data)
+
+    response = toggl.postRequest("https://www.toggl.com/api/v8/time_entries",
+                                  parameters=data)
+
+    print(response)
