@@ -20,10 +20,7 @@ toggl = Toggl()
 
 toggl.setAPIKey(TOGGL_TOKEN)
 
-if sys.argv[0] is None:
-    offset = -1
-else:
-    offset = int(sys.argv[1])
+offset = int(sys.argv[1])
 
 #Generate today-string
 index = dt.today() + datetime.timedelta(offset)
