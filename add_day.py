@@ -2,15 +2,17 @@
 import datetime
 import time
 from datetime import datetime as dt
+import sys
 
 # Integration imports
 from credentials import TOGGL_TOKEN, AIRTABLE_API_KEY
 from toggl.TogglPy import Toggl
 from airtable import Airtable
-from airtable_integrations import make_dictionary_of_base
+from airtable_integrations import *
 import gcal
 
 #Utilities
+import re
 from pprint import pprint
 from task_dicts import event_exclude
 
@@ -18,8 +20,13 @@ toggl = Toggl()
 
 toggl.setAPIKey(TOGGL_TOKEN)
 
+if sys.argv[0] is None:
+    offset = -1
+else:
+    offset = int(sys.argv[1])
+
 #Generate today-string
-index = dt.today() + datetime.timedelta(-1) #<--- Beware the time-delta!
+index = dt.today() + datetime.timedelta(offset)
 index_midnight = index.replace(hour=0, minute=1)
 index_formatted = index_midnight.isoformat() + 'Z'
 index_str = dt.strftime(index,'%Y-%m-%d')
@@ -44,12 +51,33 @@ def strip_and_datetime(time_string):
 # Setup Airtable
 task_name_project_id = make_dictionary_of_table()
 
+task_list = make_list_of_table()
+
+regex_task_list = []
+
+#
+for task in task_list:
+    if task[0][-1:] == "*" and task[0][0] == "*":
+        regex_task_list.append(task)
+
+pprint("Regex_task_list: {}".format(regex_task_list))
+
 for event in event_list:
+    projectid = None
+
+    print("Processing event {}".format(event[0]))
+    pprint(event)
     if event[0] in event_exclude:
         continue
-    elif event[0] in task_name_project_id:
+    elif event[0] in task_name_project_id: # If event is an exact match
         projectid = task_name_project_id[event[0]][0]
-    else:
+    else: # If not an exact match
+        for task in regex_task_list: # Do regex matching on all Airtable tasks ending in "*"
+            if re.match(".*{}.*".format(task[0][1:-1]), event[0]) != None:
+                projectid = task[1][0]
+                print("Task matches regex!\nProject_id: {}".format(projectid))
+
+    if projectid is None:
         projectid = task_name_project_id["Uncategorized"][0]
 
     #Generate datetime objects

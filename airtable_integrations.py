@@ -10,7 +10,7 @@ def make_dictionary_of_table(baseKey="app2VbjON28CVSlD1", table="Tasks", view='G
 
     for page in airtable.get_iter(view=view, sort=key_column):
         for record in page:
-            dict[record['fields'][key_column]] = record['fields'][value_column]
+            dict.update({record['fields'][key_column]: record['fields'][value_column]})
 
     return dict
 
