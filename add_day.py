@@ -42,15 +42,15 @@ def strip_and_datetime(time_string):
 # Run the script #
 ##################
 # Setup Airtable
-task_name_project_id = make_dictionary_of_base()
+task_name_project_id = make_dictionary_of_table()
 
 for event in event_list:
     if event[0] in event_exclude:
         continue
     elif event[0] in task_name_project_id:
-        projectid = task_name_project_id[event[0]]
+        projectid = task_name_project_id[event[0]][0]
     else:
-        projectid = task_name_project_id["Uncategorized"]
+        projectid = task_name_project_id["Uncategorized"][0]
 
     #Generate datetime objects
     start_time_dt = strip_and_datetime(event[1])
