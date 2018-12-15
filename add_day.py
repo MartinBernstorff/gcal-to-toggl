@@ -15,6 +15,7 @@ import gcal
 import re
 from pprint import pprint
 from task_dicts import event_exclude
+import urllib
 
 toggl = Toggl()
 
@@ -32,7 +33,19 @@ day_after_index = index + datetime.timedelta(1)
 day_after_index_midnight = day_after_index.replace(hour=0, minute=1)
 day_after_index_formatted = day_after_index_midnight.isoformat() + 'Z'
 
-# Setup gcal
+####################################################
+# Check if entries already exist in Toggl for date #
+####################################################
+start_date_encoded = urllib.parse.quote(index_formatted)
+end_date_encoded = urllib.parse.quote(day_after_index_formatted)
+
+entries_on_day = toggl.request("https://www.toggl.com/api/v8/time_entries" + "?start_date=" + start_date_encoded + "&end_date=" + end_date_encoded)
+
+assert entries_on_day == []
+
+##############
+# Setup gcal #
+##############
 gcal.init(index_formatted, day_after_index_formatted)
 from gcal import event_list
 print(event_list)
